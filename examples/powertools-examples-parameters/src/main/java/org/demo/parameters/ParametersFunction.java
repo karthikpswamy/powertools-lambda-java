@@ -47,6 +47,8 @@ public class ParametersFunction implements RequestHandler<APIGatewayProxyRequest
     @SSMParam(key = "/powertools-java/sample/simplekey")
     String ssmParamInjected;
 
+    boolean firstRun = true;
+
     SSMProvider ssmProvider = SSMProvider
             .builder()
             .build();
@@ -67,6 +69,8 @@ public class ParametersFunction implements RequestHandler<APIGatewayProxyRequest
 
     @Override
     public APIGatewayProxyResponseEvent handleRequest(APIGatewayProxyRequestEvent input, Context context) {
+        boolean wasFirstRun = firstRun;
+        firstRun = false;
 
         log.info("\n=============== SSM Parameter Store ===============");
         log.info("simplevalue={}, listvalue={}, b64value={}\n", simpleValue, listValue, b64value);
@@ -92,11 +96,11 @@ public class ParametersFunction implements RequestHandler<APIGatewayProxyRequest
 
             return response
                     .withStatusCode(200)
-                    .withBody(output);
+                    .withBody(wasFirstRun? "cold" : "hot");
         } catch (IOException e) {
             return response
-                    .withBody("{}")
-                    .withStatusCode(500);
+                    .withStatusCode(500)
+                    .withBody("whoops");
         }
     }
 

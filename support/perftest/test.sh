@@ -11,7 +11,7 @@ echo "Cold: $TEMPFILE_COLD"
 echo "Hot: $TEMPFILE_HOT"
 
 # Get the API URL
-export API_URL=$(aws cloudformation describe-stacks --stack-name PtPerfTest --query "Stacks[0].Outputs[?OutputKey=='HelloWorldApi'].OutputValue" --output text)
+export API_URL=$(aws cloudformation describe-stacks --stack-name PtPerfTest --query "Stacks[0].Outputs[?OutputKey=='ParametersApi'].OutputValue" --output text)
 echo API URL: $API_URL
 
 # Function to make a request and record its latency and status code

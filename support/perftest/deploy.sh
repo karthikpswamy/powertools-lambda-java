@@ -2,7 +2,7 @@
 
 set -e
 
-export TEST_EXAMPLE=core-utilities
+export TEST_EXAMPLE=parameters
 export TEST_EXAMPLE_FULLNAME=powertools-examples-$TEST_EXAMPLE
 export TEST_EXAMPLE_PATH=$(dirname "$0")/../../examples/$TEST_EXAMPLE_FULLNAME
 if [[ "$TEST_EXAMPLE" == "core-utilities" ]]; then
