@@ -68,8 +68,8 @@ public class App implements RequestHandler<APIGatewayProxyRequestEvent, APIGatew
         APIGatewayProxyResponseEvent response = new APIGatewayProxyResponseEvent()
                 .withHeaders(headers);
         try {
-            final String pageContents = this.getPageContents("https://checkip.amazonaws.com");
-            log.info(pageContents);
+//            final String pageContents = this.getPageContents("https://checkip.amazonaws.com");
+//            log.info(pageContents);
             TracingUtils.putAnnotation("Test", "New");
             String output = String.format("{ \"message\": \"hello world\", \"location\": \"%s\" }", pageContents);
 
