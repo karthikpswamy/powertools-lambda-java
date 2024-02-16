@@ -46,10 +46,16 @@ import software.amazon.lambda.powertools.tracing.TracingUtils;
 public class App implements RequestHandler<APIGatewayProxyRequestEvent, APIGatewayProxyResponseEvent> {
     private static final Logger log = LoggerFactory.getLogger(App.class);
 
+    private boolean firstRun = true;
+
     @Logging(logEvent = true, samplingRate = 0.7)
     @Tracing(captureMode = CaptureMode.RESPONSE_AND_ERROR)
     @Metrics(namespace = "ServerlessAirline", service = "payment", captureColdStart = true)
     public APIGatewayProxyResponseEvent handleRequest(final APIGatewayProxyRequestEvent input, final Context context) {
+
+        boolean wasFirstRun = firstRun;
+        firstRun = false;
+
         Map<String, String> headers = new HashMap<>();
 
         headers.put("Content-Type", "application/json");
@@ -68,23 +74,17 @@ public class App implements RequestHandler<APIGatewayProxyRequestEvent, APIGatew
         APIGatewayProxyResponseEvent response = new APIGatewayProxyResponseEvent()
                 .withHeaders(headers);
         try {
-//            final String pageContents = this.getPageContents("https://checkip.amazonaws.com");
-//            log.info(pageContents);
-            TracingUtils.putAnnotation("Test", "New");
-            String output = String.format("{ \"message\": \"hello world\", \"location\": \"%s\" }", pageContents);
-
             TracingUtils.withSubsegment("loggingResponse", subsegment ->
             {
                 String sampled = "log something out";
                 log.info(sampled);
-                log.info(output);
             });
 
             log.info("After output");
             return response
                     .withStatusCode(200)
-                    .withBody(output);
-        } catch (RuntimeException | IOException e) {
+                    .withBody(wasFirstRun? "cold" : "hot");
+        } catch (RuntimeException e) {
             return response
                     .withBody("{}")
                     .withStatusCode(500);
