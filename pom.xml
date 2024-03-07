@@ -47,6 +47,8 @@
         <module>powertools-logging/powertools-logging-log4j</module>
         <module>powertools-logging/powertools-logging-logback</module>
         <module>powertools-tracing</module>
+        <module>powertools-tracing/powertools-tracing-xray</module>
+        <module>powertools-tracing/powertools-tracing-datadog</module>
         <module>powertools-metrics</module>
         <module>powertools-parameters</module>
         <module>powertools-validation</module>
