@@ -22,16 +22,19 @@ import static software.amazon.lambda.powertools.common.internal.LambdaHandlerPro
 import static software.amazon.lambda.powertools.tracing.TracingUtils.objectMapper;
 
 import com.amazonaws.xray.AWSXRay;
-import com.amazonaws.xray.entities.Subsegment;
 import java.util.function.Supplier;
 import org.aspectj.lang.ProceedingJoinPoint;
 import org.aspectj.lang.annotation.Around;
 import org.aspectj.lang.annotation.Aspect;
 import org.aspectj.lang.annotation.Pointcut;
 import software.amazon.lambda.powertools.tracing.Tracing;
+import software.amazon.lambda.powertools.tracing.TracingManager;
 
 @Aspect
 public final class LambdaTracingAspect {
+
+    private TracingManager tracingManager;
+
     @SuppressWarnings({"EmptyMethod"})
     @Pointcut("@annotation(tracing)")
     public void callAt(Tracing tracing) {
@@ -42,14 +45,30 @@ public final class LambdaTracingAspect {
                          Tracing tracing) throws Throwable {
         Object[] proceedArgs = pjp.getArgs();
 
-        Subsegment segment = AWSXRay.beginSubsegment(
-                customSegmentNameOrDefault(tracing,
+        /**
+         * **General strategy so far**
+         *  I've tried pushing the X-Ray interaction down behind an interface. Whether or not this
+         *  is going to be a sensible approach will depend on how much datadog varies. I figure
+         *  we should try stand DD up behind the same interface, and see what falls over.
+         *
+         *  If it's too fiddly we can basically defer from this join point straight down to the TracingManager
+         *  impl for the given provider, and let it set itself up how it wants.
+         *
+         *  Extra complication is - we'll need some common interface for TracingUtils anyway. So to some
+         *  extent we'll need to tease out a common contract, even if we can't use it here ...
+         */
+
+        // Start subsegment
+        TracingManager.Subsegment segment = tracingManager.startSegment(customSegmentNameOrDefault(tracing,
                         () -> "## " + pjp.getSignature().getName()));
-        segment.setNamespace(namespace(tracing));
+
+        // Set namespace
+        // TODO - does Datadog have this?
+        // segment.setNamespace(namespace(tracing));
 
         if (isHandlerMethod(pjp)) {
-            segment.putAnnotation("ColdStart", isColdStart());
-            segment.putAnnotation("Service", namespace(tracing));
+            segment.addQueryableTag("ColdStart", isColdStart() ? "true" : "false"); // TODO - need to type this?
+            segment.addQueryableTag("Service", namespace(tracing));
         }
 
         boolean captureResponse = captureResponse(tracing);
@@ -58,7 +77,7 @@ public final class LambdaTracingAspect {
         try {
             Object methodReturn = pjp.proceed(proceedArgs);
             if (captureResponse) {
-                segment.putMetadata(namespace(tracing), pjp.getSignature().getName() + " response",
+                segment.addInformationalTag(namespace(tracing), pjp.getSignature().getName() + " response",
                         null != objectMapper() ? objectMapper().writeValueAsString(methodReturn) : methodReturn);
             }
 
@@ -69,7 +88,7 @@ public final class LambdaTracingAspect {
             return methodReturn;
         } catch (Exception e) {
             if (captureError) {
-                segment.putMetadata(namespace(tracing), pjp.getSignature().getName() + " error",
+                segment.addInformationalTag(namespace(tracing), pjp.getSignature().getName() + " error",
                         null != objectMapper() ? objectMapper().writeValueAsString(e) : e);
             }
             throw e;

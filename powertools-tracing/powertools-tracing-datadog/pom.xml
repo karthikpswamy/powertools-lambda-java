@@ -11,7 +11,7 @@
         <relativePath>../../pom.xml</relativePath>
     </parent>
 
-    <artifactId>powertools-tracing-xray</artifactId>
+    <artifactId>powertools-tracing-datadog</artifactId>
     <packaging>jar</packaging>
     <name>Powertools for AWS Lambda (Java) - Tracing with Datadog</name>
     <description>Tracing utilities for AWS Lambda (Java) using Datadog</description>
@@ -19,7 +19,7 @@
     <dependencies>
         <dependency>
             <groupId>software.amazon.lambda</groupId>
-            <artifactId>powertools-logging</artifactId>
+            <artifactId>powertools-tracing</artifactId>
             <version>${project.version}</version>
         </dependency>
         <dependency>
