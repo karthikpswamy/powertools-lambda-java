@@ -40,6 +40,14 @@ public final class LambdaTracingAspect {
     public void callAt(Tracing tracing) {
     }
 
+    public thing MyRequestHandler() {
+
+        @Tracing
+        public void HandleRequest() {
+
+        }
+    }
+
     @Around(value = "callAt(tracing) && execution(@Tracing * *.*(..))", argNames = "pjp,tracing")
     public Object around(ProceedingJoinPoint pjp,
                          Tracing tracing) throws Throwable {
