@@ -23,8 +23,10 @@ import static software.amazon.lambda.powertools.metrics.internal.LambdaMetricsAs
 import java.util.Arrays;
 import java.util.Optional;
 import java.util.function.Consumer;
+
 import software.amazon.cloudwatchlogs.emf.config.SystemWrapper;
 import software.amazon.cloudwatchlogs.emf.environment.EnvironmentProvider;
+import software.amazon.cloudwatchlogs.emf.environment.LambdaEnvironmentProvider;
 import software.amazon.cloudwatchlogs.emf.logger.MetricsLogger;
 import software.amazon.cloudwatchlogs.emf.model.DimensionSet;
 import software.amazon.cloudwatchlogs.emf.model.MetricsContext;
@@ -38,7 +40,7 @@ import software.amazon.cloudwatchlogs.emf.model.Unit;
  * {@see Metrics}
  */
 public final class MetricsUtils {
-    private static final MetricsLogger metricsLogger = new MetricsLogger();
+    private static final MetricsLogger metricsLogger = new MetricsLogger(new LambdaEnvironmentProvider());
     private static DimensionSet[] defaultDimensions;
 
     private MetricsUtils() {
